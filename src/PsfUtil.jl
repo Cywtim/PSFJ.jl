@@ -119,7 +119,7 @@ module PsfUtil
     """
     function JwstExampleStars()
         package_path =  psfj_path
-        path_stars = string(package_path, "/Data/JWST/")
+        path_stars = string(package_path, "/../src/Data/JWST/")
         star_name = "psf_f090w_star"
 
         star_list = []

@@ -3,6 +3,16 @@ uuid = "b1f51746-9e9d-4163-971e-610fed114a33"
 authors = ["Cywtim"]
 version = "1.0.0-DEV"
 
+[deps]
+FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+Photometry = "af68cb61-81ac-52ed-8703-edc140936be4"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+SciPy = "ebc72ef8-9537-4fb0-b64e-ac76025fed2d"
+ShiftedArrays = "1277b4bf-5013-50f5-be3d-901d8477a67a"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
 [compat]
 julia = "1.10.1"
 

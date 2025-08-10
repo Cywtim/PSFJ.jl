@@ -1,6 +1,6 @@
-module PsfJ
+module PSFJ
 
-    using Optim, ShiftedArrays, SciPy
+    using  SciPy, Optim, ShiftedArrays, Statistics
     include("KernelUtil.jl")
     include("PsfUtil.jl")
     include("MaskUtil.jl")
