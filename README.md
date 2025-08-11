@@ -16,18 +16,20 @@ The result of the psf function reconstruction
 </p>
 
 ## Oversampling
-The 
+The image of oversampled psf map
 <p align="center">
 <img src="images/psf_oversampling.png" alt="result" width="70%">
 </p>
 
 ## Degraded PSF
+The result of degraded the oversampling psf
 <p align="center">
 <img src="images/psf_degraded.png" alt="result" width="70%">
 </p>
 
 
 ## Errormap
+The image of errormap for point source image
 <p align="center">
 <img src="images/errormap.png" alt="result" width="70%">
 </p>
