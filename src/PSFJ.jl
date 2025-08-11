@@ -12,7 +12,7 @@ module PSFJ
     # Export the path of this file
     psfj_path = pwd()
 
-    function log10_scale(arr)
+    function log10_scale(arr::AbstractArray)
 
         log10arr = zeros(size(arr))
         log10arr[ arr.>0 ] .= log10.(arr[ arr.>0 ])
@@ -43,7 +43,7 @@ module PSFJ
         linear amplitude such that (data - amp * model)^2 / variance is minimized
     ...
     """
-    function _LinearAmplitude(data, model; 
+    function _LinearAmplitude(data::AbstractArray, model::AbstractArray; 
         variance=nothing,
          mask=nothing)
 
