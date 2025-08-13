@@ -33,7 +33,7 @@ kwargs_one_step=Dict(:verbose=>false,
                  :step_factor=>0.5,
                  :deshift_order=>1);
 ```
-Then pass the parameters to `StackPsf`:
+Then passing the parameters to `StackPsf`:
 ```
 psf_guess, center_list_psfr, mask_list, amplitude_list= PSFJ.StackPsf(star_list; oversampling=1, 
     saturation_limit=nothing, num_iteration=20, 
@@ -68,7 +68,7 @@ psf_psfr_super, center_list_psfr_super, mask_list, amplitude_list_super = PSFJ.S
 </p>
 
 ### Degraded PSF
-Setting the `DegradeKernel`
+Setting the Degrade Kernel
 ```
 psf_psfr_super_degraded = KernelUtil.DegradeKernel(psf_psfr_super, 4)
 psf_psfr_super_degraded = KernelUtil.CutPsf(psf_psfr_super_degraded, 91);
