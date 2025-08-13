@@ -4,6 +4,7 @@ authors = ["Cywtim"]
 version = "1.0.0-DEV"
 
 [deps]
+Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 ImageTransformations = "02fcd773-0e25-5acc-982a-7f6622650795"
 Optim = "429524aa-4258-5aef-a3af-852621145aeb"
