@@ -1,6 +1,8 @@
 # PSFJ
 
-This a Julia package for PSF(Point spread function) inspired by psfr-python
+This a Julia package for PSF(Point spread function) inspired by psfr-python.
+See more usage in <a href="test/Tutorial.ipynb">Tutorial.ipynb</a>
+
 
 ## Load the packages
 ```
