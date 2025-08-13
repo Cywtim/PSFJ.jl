@@ -6,7 +6,6 @@ See more usage in <a href="test/Tutorial.ipynb">Tutorial.ipynb</a>
 
 ## Load the packages
 ```
-using PyPlot, BenchmarkTools, SciPy, Optim, Statistics 
 using PSFJ
 using PSFJ.PsfUtil
 using PSFJ.KernelUtil
