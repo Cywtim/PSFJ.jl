@@ -2,8 +2,19 @@
 
 This a Julia package for PSF(Point spread function) inspired by psfr-python
 
+## Load the packages
+```
+using PyPlot, BenchmarkTools, SciPy, Optim, Statistics 
+using PSFJ
+using PSFJ.PsfUtil
+using PSFJ.KernelUtil
+```
+
 ## JWST star
 We using the JWFS star image as an example of the package
+```
+star_list = PSFJ.PsfUtil.JwstExampleStars();
+```
 <p align="center">
 <img src="images/star.png" alt="result" width="70%">
 </p>
@@ -11,6 +22,25 @@ We using the JWFS star image as an example of the package
 ## PSF reconstruction
 The result of the psf function reconstruction
 
+### result of stacking psf
+Setting the kwargs of PSF:
+```
+# Define the kwargs of PSF
+kwargs_psf_stacking = Dict(:stacking_option=>"mean")
+# Stacking method, optional {"mean",  "median" or "median_weight"}
+kwargs_one_step=Dict(:verbose=>false, 
+                 :oversampled_residual_deshifting=>true,
+                 :step_factor=>0.5,
+                 :deshift_order=>1);
+```
+Then pass the parameters to `StackPsf`:
+```
+psf_guess, center_list_psfr, mask_list, amplitude_list= PSFJ.StackPsf(star_list; oversampling=1, 
+    saturation_limit=nothing, num_iteration=20, 
+    n_recenter=5, kwargs_psf_stacking=kwargs_psf_stacking,
+    kwargs_one_step=kwargs_one_step);
+```
+The result in log-scale:
 <p align="center">
 <img src="images/psf.png" alt="result" width="70%">
 </p>
