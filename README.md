@@ -45,13 +45,34 @@ The result in log-scale:
 <img src="images/psf.png" alt="result" width="70%">
 </p>
 
-## Oversampling
-The image of oversampled psf map
+### Oversampling
+Oversampling dict:
+```
+kwargs_psf_stacking = Dict(:stacking_option=>"mean")
+# Stacking method, optional {"mean",  "median" or "median_weight"}
+
+kwargs_one_step=Dict(:verbose=>false, 
+                 :oversampled_residual_deshifting=>true,
+                 :step_factor=>0.5,
+                 :deshift_order=>1);
+```
+The image of oversampled psf map via
+```
+psf_psfr_super, center_list_psfr_super, mask_list, amplitude_list_super = PSFJ.StackPsf(star_list; oversampling=4, 
+                                                                        saturation_limit=nothing, num_iteration=15, 
+                                                                        n_recenter=5, kwargs_psf_stacking=kwargs_psf_stacking,
+                                                                        kwargs_one_step=kwargs_one_step);
+```
 <p align="center">
 <img src="images/psf_oversampling.png" alt="result" width="70%">
 </p>
 
-## Degraded PSF
+### Degraded PSF
+Setting the `DegradeKernel`
+```
+psf_psfr_super_degraded = KernelUtil.DegradeKernel(psf_psfr_super, 4)
+psf_psfr_super_degraded = KernelUtil.CutPsf(psf_psfr_super_degraded, 91);
+```
 The result of degraded the oversampling psf
 <p align="center">
 <img src="images/psf_degraded.png" alt="result" width="70%">
@@ -59,7 +80,10 @@ The result of degraded the oversampling psf
 
 
 ## Errormap
-The image of errormap for point source image
+Once the degbraded psf is solved, the errormap of point source is
+```
+error_map = PSFJ.PsfErrorMap(star_list, psf_psfr_super_degraded, center_list_psfr_super);
+```
 <p align="center">
 <img src="images/errormap.png" alt="result" width="70%">
 </p>
