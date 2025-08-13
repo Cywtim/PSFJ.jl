@@ -22,7 +22,7 @@ star_list = PSFJ.PsfUtil.JwstExampleStars();
 ## PSF reconstruction
 The result of the psf function reconstruction
 
-### result of stacking psf
+### stacking psf
 Setting the kwargs of PSF:
 ```
 # Define the kwargs of PSF
@@ -45,7 +45,7 @@ The result in log-scale:
 <img src="images/psf.png" alt="result" width="70%">
 </p>
 
-### Oversampling
+### oversampling
 Oversampling dict:
 ```
 kwargs_psf_stacking = Dict(:stacking_option=>"mean")
@@ -67,7 +67,7 @@ psf_psfr_super, center_list_psfr_super, mask_list, amplitude_list_super = PSFJ.S
 <img src="images/psf_oversampling.png" alt="result" width="70%">
 </p>
 
-### Degraded PSF
+### degraded psf
 Setting the Degrade Kernel
 ```
 psf_psfr_super_degraded = KernelUtil.DegradeKernel(psf_psfr_super, 4)
