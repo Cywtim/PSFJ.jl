@@ -1,0 +1,29 @@
+name: runtests
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental == 'nightly' }}
+    strategy:
+      matrix:
+        julia-version: ['1.5']
+        os: [ubuntu-latest]
+        JULIA_FFTW_PROVIDER: ['MKL','FFTW']
+      fail-fast: false
+    env:
+      PYTHON: python3
+
+    steps:
+      - uses: actions/checkout@v1.0.0
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.julia-version }}
+      - run: >
+          sudo apt-get install --no-install-recommends gfortran python3-setuptools python3-wheel
+          && pip3 install camb
+      - uses: julia-actions/julia-runtest@master
+        timeout-minutes: 25
+        env:
+          JULIA_FFTW_PROVIDER: ${{ matrix.JULIA_FFTW_PROVIDER }}
