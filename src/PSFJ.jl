@@ -1,5 +1,6 @@
 module PSFJ
-
+    
+    push!(LOAD_PATH, @__DIR__)
     using  SciPy, Optim, ShiftedArrays, Statistics
     include("KernelUtil.jl")
     include("PsfUtil.jl")
@@ -98,7 +99,7 @@ module PSFJ
         shifted PSF, optionally degraded to the data resolution
     ...
     """
-    function ShiftPsf(psf_center; shift, oversampling=1, degrade=true, n_pix_star=1.,deshift_order=1)
+    function ShiftPsf(psf_center::AbstractArray; shift::AbstractArray, oversampling::Int=1, degrade::Bool=true, n_pix_star::Int=1,deshift_order::Int=1)
         shift_x = shift[1] .* oversampling
         shift_y = shift[2] .* oversampling
         # shift psf
@@ -131,7 +132,7 @@ module PSFJ
     star_shift : luminosity centered star
     ...
     """
-    function LuminosityCentring(star)
+    function LuminosityCentring(star::AbstractArray)
 
         x_grid, y_grid = KernelUtil.MakeGrid(size(star)[1]; deltapix=1, left_lower=false)
         x_grid, y_grid = KernelUtil.Array2Image(x_grid), KernelUtil.Array2Image(y_grid)
@@ -166,7 +167,7 @@ module PSFJ
         luminosity weighted and mask-excluded stacked stars
     ...
     """
-    function BaseStacking(star_list, mask_list; symmetry=1)
+    function BaseStacking(star_list::AbstractArray, mask_list::AbstractArray; symmetry::Int=1)
         star_stack_base = zeros(size(star_list[1]))
         weight_map = zeros(size(star_list[1]))
         angle = 2 .* pi ./ symmetry
@@ -221,12 +222,12 @@ module PSFJ
     kernel_return : updated PSF estimate and error_map associated with it
     ...
     """
-    function CombinePsf(kernel_list_new, kernel_old;
-         mask_list=nothing,
-             amplitude_list=nothing,
-              factor=1., stacking_option="median",
-                symmetry=1., combine_with_old=false,
-                 error_map_list=nothing)
+    function CombinePsf(kernel_list_new::AbstractArray, kernel_old::AbstractArray;
+         mask_list::Union{AbstractArray, Nothing}=nothing,
+             amplitude_list::Union{AbstractArray, Nothing}=nothing,
+              factor::Float64=1., stacking_option::String="median",
+                symmetry::Int=1, combine_with_old::Bool=false,
+                 error_map_list::Union{AbstractArray, Nothing}=nothing)
 
         n = Int(length(kernel_list_new) .* symmetry)
 
@@ -346,9 +347,11 @@ module PSFJ
         <point source variance>(i, j) = error_map(i, j) * <integrated point source flux>
     ...
     """
-    function PsfErrorMap(star_list, psf_kernel, center_list,
-         mask_list=nothing,
-          error_map_list=nothing, oversampling=1)
+    function PsfErrorMap(star_list::AbstractArray, 
+        psf_kernel::AbstractArray, center_list::AbstractArray,
+         mask_list::Union{AbstractArray, Nothing}=nothing,
+          error_map_list::Union{AbstractArray, Nothing}=nothing,
+           oversampling::Int=1)
         # creating oversampled mask
         if mask_list === nothing
             for (i, star) in enumerate(star_list)
@@ -422,9 +425,9 @@ module PSFJ
         required shift in units of pixels in the data such that the model matches best the data
     ...
     """
-    function CentroidFit(data, model;
-         mask=nothing, variance=nothing,
-          oversampling=1, optimizer_type="Nelder-Mead")
+    function CentroidFit(data::AbstractArray, model::AbstractArray;
+         mask::Union{AbstractArray, Nothing}=nothing, variance::Union{AbstractArray, Nothing}=nothing,
+          oversampling::Int=1, optimizer_type::String="Nelder-Mead")
 
           init = [0., 0.] # Errrrrrrrrr
           lower_bounds = (-10., -10.)
@@ -509,9 +512,12 @@ module PSFJ
         If True, provides plots of intermediate products walking through one iteration process for each individual star
     ...
     """
-    function OneStepPsfEstimate(star_list, psf_guess, center_list; mask_list=nothing, error_map_list=nothing,
-             oversampling=1, step_factor=0.2, oversampled_residual_deshifting=true, deshift_order=1,
-              verbose=false, kwargs_psf_stacking=Dict(:stacking_option=>"mean"))
+    function OneStepPsfEstimate(star_list::AbstractArray, psf_guess::AbstractArray,
+         center_list::AbstractArray; mask_list::Union{AbstractArray, Nothing}=nothing,
+          error_map_list::Union{AbstractArray, Nothing}=nothing,
+             oversampling::Int=1, step_factor::Float64=0.2, 
+             oversampled_residual_deshifting::Bool=true, deshift_order::Int=1,
+              verbose::Bool=false, kwargs_psf_stacking::Dict=Dict(:stacking_option=>"mean"))
     
         # creating oversampled mask
         if isnothing(mask_list)
@@ -547,7 +553,7 @@ module PSFJ
             # make data degraded version
             psf_shifted_data = PsfUtil.Oversam2Reg(psf_shifted; oversampling=oversampling)
             # make sure size is the same as the data and normalized to sum = 1
-            psf_shifted_data = KernelUtil.CutPsf(psf_shifted_data, size(star)[1])
+            psf_shifted_data = KernelUtil.CutPsf(psf_shifted_data, Int(size(star)[1]))
             # linear inversion in 1d
             amp = _LinearAmplitude(star, psf_shifted_data, variance=error_map_list[i], mask=mask_list_[i])
             push!(amplitude_list, amp)
@@ -697,10 +703,11 @@ module PSFJ
         list of astrometric centers relative to the center pixel of the individual stars
     ...
     """
-    function StackPsf(star_list; oversampling=1, mask_list=nothing,
-             error_map_list=nothing, saturation_limit=nothing, num_iteration=20,
-              n_recenter=5, verbose=false, kwargs_one_step=nothing, psf_initial_guess=nothing,
-               kwargs_psf_stacking=nothing, centroid_optimizer="Nelder-Mead", kwargs_animate=nothing)
+    function StackPsf(star_list::AbstractArray; oversampling::Int=1, mask_list::Union{AbstractArray, Nothing}=nothing,
+             error_map_list::Union{AbstractArray, Nothing}=nothing, saturation_limit::Union{AbstractArray, Nothing}=nothing,
+              num_iteration::Int=20, n_recenter::Int=5, verbose::Bool=false,
+               kwargs_one_step::Union{Dict, Nothing}=nothing, psf_initial_guess::Union{AbstractArray, Nothing}=nothing,
+               kwargs_psf_stacking::Union{Dict, Nothing}=nothing, centroid_optimizer::String="Nelder-Mead", kwargs_animate::Union{Bool, Nothing}=nothing)
         # update the mask according to settings
         mask_list, use_mask = MaskUtil.MaskConfig(star_list; mask_list=mask_list,
                                                     saturation=saturation_limit)

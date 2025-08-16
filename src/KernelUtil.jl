@@ -1,33 +1,32 @@
 module KernelUtil
 
+    push!(LOAD_PATH, @__DIR__)
+
     using ImageTransformations
 
     export DegradeKernel, CutEdges, Image2Array, Array2Image
 
 
-    """
-    ...
-    :param kernel: List of Matrix or Matrix
-    :return: normalisation of the psf kernel
-    ...
-    """
-    function KernelNorm(kernel)
+    function KernelNorm(kernel::AbstractArray)
+        #=
+            :param kernel: List of Matrix or Matrix
+            :return: normalisation of the psf kernel
+        =#
         norm = sum(kernel)
         kernel = kernel ./ norm
         return kernel
     end
 
-    """
-    ...
-    Querries ImageTransformations.imrotate routine 
-    param img: image to be rotated 
-    param angle: angle to be rotated (radian) 
-    param reshape: if false, Preserve the original axes
 
-    :return: rotated image.
-    ...
-    """
-    function RotateImage(img, angle; reshape=false, fillvalue=0.)
+    function RotateImage(img::AbstractArray, angle::Real; reshape::Bool=false, fillvalue::Real=0.)
+        #=
+            Querries ImageTransformations.imrotate routine 
+            param img: image to be rotated 
+            param angle: angle to be rotated (radian) 
+            param reshape: if false, Preserve the original axes
+
+            :return: rotated image.
+        =#
 
         if reshape
             imgR = imrotate(img, angle)
@@ -38,18 +37,16 @@ module KernelUtil
         return imgR
     end
 
-    """
-    ...
-    Resize 2d pixel grid with numGrid to numPix and averages over the pixels.
+    function Averaging(grid::AbstractArray; numGrid::Int, numPix::Int)
+        #=
+            Resize 2d pixel grid with numGrid to numPix and averages over the pixels.
 
-    :param grid: higher resolution pixel grid
-    :param numGrid: number of pixels per axis in the high resolution input image
-    :param numPix: lower number of pixels per axis in the output image (numGrid/numPix
-        is integer number)
-    :return: averaged pixel grid
-    ...
-    """
-    function Averaging(grid; numGrid::Int, numPix::Int)
+            :param grid: higher resolution pixel grid
+            :param numGrid: number of pixels per axis in the high resolution input image
+            :param numPix: lower number of pixels per axis in the output image (numGrid/numPix
+                is integer number)
+            :return: averaged pixel grid
+        =#
 
         Nbig = Int(numGrid)
         Nsmall = Int(numPix)
@@ -62,14 +59,12 @@ module KernelUtil
     end
 
 
-    """
-    ...
-    :param kernel_super: higher resolution kernel (odd number per axis)
-    :param degrading_factor: degrading factor (effectively the super-sampling resolution of the kernel given
-    :return: degraded kernel with odd axis number with the sum of the flux/values in the kernel being preserved
-    ...
-    """
-    function DegradeKernel(kernel_super, degrading_factor::Int)
+    function DegradeKernel(kernel_super::AbstractArray, degrading_factor::Int)
+        #=
+            :param kernel_super: higher resolution kernel (odd number per axis)
+            :param degrading_factor: degrading factor (effectively the super-sampling resolution of the kernel given
+            :return: degraded kernel with odd axis number with the sum of the flux/values in the kernel being preserved
+        =#
 
         if degrading_factor == 1
             return kernel_super
@@ -87,20 +82,20 @@ module KernelUtil
 
     end
 
-    """
-    ...
-    Makes a lower resolution kernel based 
-    
-    the kernel_high_res (odd numbers) and
-    the subgrid_res (even number), both meant to be centered.
 
-    :param kernel_high_res: high resolution kernel with even subsampling resolution,
-        centered
-    :param subgrid_res: subsampling resolution (even number)
-    :return: averaged undersampling kernel
-    ...
-    """
-    function AveragingEvenKernel(kernel_high_res, subgrid_res)
+    function AveragingEvenKernel(kernel_high_res::AbstractArray, subgrid_res::Int)
+        #=
+            Makes a lower resolution kernel based 
+    
+            the kernel_high_res (odd numbers) and
+            the subgrid_res (even number), both meant to be centered.
+
+            :param kernel_high_res: high resolution kernel with even subsampling resolution,
+                centered
+            :param subgrid_res: subsampling resolution (even number)
+            :return: averaged undersampling kernel
+        =#
+
         n_kernel_high_res = size(kernel_high_res)[1]
         n_low = @. Int(round(n_kernel_high_res / subgrid_res + 0.5))
 
@@ -160,7 +155,18 @@ module KernelUtil
     
     end
 
-    function AveragingOddKernel(kernel_super, degrading_factor)
+    function AveragingOddKernel(kernel_super::AbstractArray, degrading_factor::Real)
+        #=
+            Makes a lower resolution kernel based 
+    
+            the kernel_high_res (odd numbers) and
+            the subgrid_res (even number), both meant to be centered.
+
+            :param kernel_high_res: high resolution kernel with even subsampling resolution,
+                centered
+            :param subgrid_res: subsampling resolution (even number)
+            :return: averaged undersampling kernel
+        =#
         
         n_kernel = size(kernel_super)[1]
         numPix = Int.(round.(n_kernel ./ degrading_factor .+ 0.5))
@@ -179,17 +185,16 @@ module KernelUtil
     
     end
 
-    """
-    ...
-    Cuts out the edges of a 2d image and returns re-sized image to numPix center is
-    well defined for odd pixel sizes.
 
-    :param image: 2d numpy array
-    :param num_pix: square size of cut out image
-    :return: cutout image with size numPix
-    ...
-    """
-    function CutEdges(image, num_pix)
+    function CutEdges(image::AbstractArray, num_pix::Int)
+        #=
+            Cuts out the edges of a 2d image and returns re-sized image to numPix center is
+            well defined for odd pixel sizes.
+
+            :param image: 2d numpy array
+            :param num_pix: square size of cut out image
+            :return: cutout image with size numPix
+        =#
 
         nx, ny = size(image)
         if nx < num_pix || ny < num_pix
@@ -215,19 +220,18 @@ module KernelUtil
         return deepcopy(resized)
     end
 
-    """
-    ...
-    Creates pixel grid (in 1d arrays of x- and y- positions) default coordinate frame
-    is such that (0,0) is in the center of the coordinate grid.
 
-    :param numPix: number of pixels per axis Give an integers for a square grid, or a
-        2-length sequence (first, second axis length) for a non-square grid.
-    :param deltapix: pixel size
-    :param subgrid_res: sub-pixel resolution (default=1)
-    :return: x, y position information in two 1d arrays
-    ...
-    """
-    function MakeGrid(numPix; deltapix=1, subgrid_res=1, left_lower=false)
+    function MakeGrid(numPix::Union{Real, AbstractArray}; deltapix::Real=1, subgrid_res::Real=1, left_lower::Bool=false)
+        #=
+            Creates pixel grid (in 1d arrays of x- and y- positions) default coordinate frame
+            is such that (0,0) is in the center of the coordinate grid.
+
+            :param numPix: number of pixels per axis Give an integers for a square grid, or a
+                2-length sequence (first, second axis length) for a non-square grid.
+            :param deltapix: pixel size
+            :param subgrid_res: sub-pixel resolution (default=1)
+            :return: x, y position information in two 1d arrays
+        =#
 
         # Check numPix is an integer, or 2-sequence of integers
         if isa(numPix , Union{Tuple, Array})
@@ -267,16 +271,15 @@ module KernelUtil
 
     end
 
-    """
-    ...
-    Cut the psf properly.
 
-    :param psf_data: image of PSF
-    :param psf_size: size of psf
-    :return: re-sized and re-normalized PSF
-    ...
-    """
-    function CutPsf(psf_data, psf_size, normalisation=true)
+    function CutPsf(psf_data::AbstractArray, psf_size::Real, normalisation::Bool=true)
+        #=
+            Cut the psf properly.
+
+            :param psf_data: image of PSF
+            :param psf_size: size of psf
+            :return: re-sized and re-normalized PSF
+        =#
         kernel = CutEdges(psf_data, psf_size)
         if normalisation == true
             kernel = KernelNorm(kernel)
@@ -284,18 +287,17 @@ module KernelUtil
         return kernel
     end
 
-    """
-    ...
-    Returns the information contained in a 1d array into an n*n 2d array (only works
-    when length of array is n**2, or nx and ny are provided)
 
-    :param array: image values
-    :type array: array of size n**2
-    :returns: 2d array
-    :raises: AttributeError, KeyError
-    ...
-    """
-    function Array2Image(array, nx=0, ny=0)
+    function Array2Image(array::AbstractArray, nx::Real=0, ny::Real=0)
+        #=
+            Returns the information contained in a 1d array into an n*n 2d array (only works
+            when length of array is n**2, or nx and ny are provided)
+
+            :param array: image values
+            :type array: array of size n**2
+            :returns: 2d array
+            :raises: AttributeError, KeyError
+        =#
         if nx == 0 || ny == 0
             n = Int.(sqrt.(length(array)))
             if n^2 != length(array)
@@ -313,17 +315,15 @@ module KernelUtil
     end
 
 
-    """
-    ...    
-    Returns the information contained in a 2d array into an n*n 1d array.
+    function Image2Array(image::AbstractArray)
+        #=
+            Returns the information contained in a 2d array into an n*n 1d array.
 
-    :param image: image values
-    :type image: array of size (n,n)
-    :returns: 1d array
-    :raises: AttributeError, KeyError
-    ...
-    """
-    function Image2Array(image)
+            :param image: image values
+            :type image: array of size (n,n)
+            :returns: 1d array
+            :raises: AttributeError, KeyError
+        =#
 
         nx, ny = size(image)  # find the size of the array
         imgh = reshape(image, nx * ny)  # change the shape to be 1d

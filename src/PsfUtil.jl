@@ -1,21 +1,21 @@
 module PsfUtil
 
+    push!(LOAD_PATH, @__DIR__)
     using FITSIO, ShiftedArrays, Statistics, Photometry
     #include("PsfJ.jl")
     include("KernelUtil.jl")
 
     export JwstExampleStars, Reg2Oversam, Oversam2Reg, MedianWithMask
+    #psfj_path = pwd()
 
-    psfj_path = pwd()
-
-    function log10_scale(arr)
+    function log10_scale(arr::AbstractArray)
 
         log10arr = zeros(size(arr))
         log10arr[ arr.>0 ] .= log10.(arr[ arr.>0 ])
         return log10arr
     end
 
-    function Reg2Oversam(img; oversampling=1)
+    function Reg2Oversam(img::AbstractArray; oversampling::Int=1)
         #=
         makes each pixel n x n pixels (with n=oversampling), makes it such that center remains in center pixel
         No sharpening below the original pixel scale is performed. This function should behave as the inverse of
@@ -72,7 +72,7 @@ module PsfUtil
 
     end
 
-    function Oversam2Reg(img_oversampling; oversampling::Int=1)
+    function Oversam2Reg(img_oversampling::AbstractArray; oversampling::Int=1)
 
         #=
         Averages the pixel flux such that s x s oversampled pixels result in one pixel, with s = oversampling.
@@ -118,8 +118,8 @@ module PsfUtil
     ...
     """
     function JwstExampleStars()
-        package_path =  psfj_path
-        path_stars = string(package_path, "/../src/Data/JWST/")
+        #package_path =  psfj_path
+        path_stars = string( @__DIR__, "/Data/JWST/")
         star_name = "psf_f090w_star"
 
         star_list = []
