@@ -16,7 +16,7 @@ jobs:
       PYTHON: python3
 
     steps:
-      - uses: actions/checkout@v1.0.0
+      - uses: actions/checkout@v5.0.0
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
